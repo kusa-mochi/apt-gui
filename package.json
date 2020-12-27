@@ -12,6 +12,7 @@
   "main": "background.js",
   "dependencies": {
     "element-ui": "^2.4.5",
+    "sudo-prompt": "^9.2.1",
     "vue": "^2.6.11",
     "vuex": "^3.4.0"
   },

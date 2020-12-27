@@ -11,8 +11,8 @@
         <about></about>
       </el-tab-pane>
     </el-tabs>
-    <!-- <el-button @click="TestMethod">ボタン</el-button>
-    <img width="20" src="@/assets/icn_search.svg?data" /> -->
+    <el-button @click="TestMethod">ボタン</el-button>
+    <!-- <img width="20" src="@/assets/icn_search.svg?data" /> -->
   </div>
 </template>
 
@@ -29,7 +29,10 @@ export default {
   },
   methods: {
     TestMethod() {
-      alert("button pushed.");
+      this.$store.dispatch("DoCommandAsSudo", {
+        command: "mkdir",
+        args: "-p /opt/mochimochi2/test/"
+      });
     }
   },
   name: "App"

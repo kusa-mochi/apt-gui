@@ -30,8 +30,8 @@ export default {
   methods: {
     TestMethod() {
       this.$store.dispatch("DoCommandAsSudo", {
-        command: "mkdir",
-        args: "-p /opt/mochimochi2/test/"
+        command: "cat",
+        args: "/sudo-mochi/test.txt"
       });
     }
   },

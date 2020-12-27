@@ -81,29 +81,23 @@ if (isDevelopment) {
 }
 
 ipcMain.handle("do-command-as-general-user", (event, { command, args }) => {
-  try {
-    const childProcess = window.require("child_process");
-    childProcess.exec(
-      `${command} ${args}`,
-      { name: "Electron" },
-      (error, stdout) => {
-        if (error) throw error;
-        console.log(stdout);
-      }
-    );
-  } catch (e) {
-    return `"${command} ${args}" failed.`;
-  }
+  const p = require("child_process");
+  p.exec(`${command} ${args}`, { name: "Electron" }, (error, stdout) => {
+    if (error) {
+      event.sender.send("do-command-as-general-user__error", error);
+      return;
+    }
+    event.sender.send("do-command-as-general-user__reply", stdout);
+  });
 });
 
 ipcMain.handle("do-command-as-sudo", (event, { command, args }) => {
-  try {
-    const sudo = require("sudo-prompt");
-    sudo.exec(`${command} ${args}`, { name: "Electron" }, (error, stdout) => {
-      if (error) throw error;
-      console.log(stdout);
-    });
-  } catch (e) {
-    return `"sudo ${command} ${args}" failed.`;
-  }
+  const p = require("sudo-prompt");
+  p.exec(`${command} ${args}`, { name: "Electron" }, (error, stdout) => {
+    if (error) {
+      event.sender.send("do-command-as-sudo__error", error);
+      return;
+    }
+    event.sender.send("do-command-as-sudo__reply", stdout);
+  });
 });

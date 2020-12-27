@@ -87,7 +87,20 @@
 </template>
 
 <script>
+import { ipcRenderer } from "electron";
 export default {
+  async mounted() {
+    const ret = await ipcRenderer.invoke(
+      "test-invoke",
+      "/opt/mochimochi/testfolder/"
+    );
+
+    // エラー処理
+    if(ret.error) {
+      alert("mkdir failed.");
+      return;
+    }
+  },
   name: "HelloWorld",
   props: {
     msg: String

@@ -1,6 +1,6 @@
 "use strict";
 
-import { app, protocol, BrowserWindow } from "electron";
+import { app, protocol, BrowserWindow, ipcMain } from "electron";
 import { createProtocol } from "vue-cli-plugin-electron-builder/lib";
 import installExtension, { VUEJS_DEVTOOLS } from "electron-devtools-installer";
 const isDevelopment = process.env.NODE_ENV !== "production";
@@ -79,3 +79,19 @@ if (isDevelopment) {
     });
   }
 }
+
+ipcMain.handle("test-invoke", (event, dirPath) => {
+  try {
+    var sudo = require("sudo-prompt");
+    var options = {
+      name: "Electron",
+      icns: "/Applications/Electron.app/Contents/Resources/Electron.icns" // (optional)
+    };
+    sudo.exec("mkdir -p " + dirPath, options, function(error, stdout) {
+      if (error) throw error;
+    });
+    return dirPath;
+  } catch (e) {
+    return "test-invoke failed.";
+  }
+});

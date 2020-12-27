@@ -13,6 +13,7 @@
   },
   "main": "background.js",
   "dependencies": {
+    "sudo-prompt": "^9.2.1",
     "vue": "^2.6.11",
     "vuex": "^3.4.0"
   },

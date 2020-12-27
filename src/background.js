@@ -80,11 +80,11 @@ if (isDevelopment) {
   }
 }
 
-ipcMain.handle("do-command-as-general-user", (event, data) => {
+ipcMain.handle("do-command-as-general-user", (event, { command, args }) => {
   try {
     const childProcess = window.require("child_process");
     childProcess.exec(
-      `${data.command} ${data.args}`,
+      `${command} ${args}`,
       { name: "Electron" },
       (error, stdout) => {
         if (error) throw error;
@@ -92,22 +92,18 @@ ipcMain.handle("do-command-as-general-user", (event, data) => {
       }
     );
   } catch (e) {
-    return `"${data.command} ${data.args}" failed.`;
+    return `"${command} ${args}" failed.`;
   }
 });
 
-ipcMain.handle("do-command-as-sudo", (event, data) => {
+ipcMain.handle("do-command-as-sudo", (event, { command, args }) => {
   try {
     const sudo = require("sudo-prompt");
-    sudo.exec(
-      `${data.command} ${data.args}`,
-      { name: "Electron" },
-      (error, stdout) => {
-        if (error) throw error;
-        console.log(stdout);
-      }
-    );
+    sudo.exec(`${command} ${args}`, { name: "Electron" }, (error, stdout) => {
+      if (error) throw error;
+      console.log(stdout);
+    });
   } catch (e) {
-    return `"sudo ${data.command} ${data.args}" failed.`;
+    return `"sudo ${command} ${args}" failed.`;
   }
 });

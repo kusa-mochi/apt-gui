@@ -22,9 +22,21 @@ export default new Vuex.Store({
   },
   actions: {
     DoCommandAsGeneralUser(context, data) {
+      if (
+        data.command === undefined ||
+        data.command === null ||
+        data.command === ""
+      ) return;
+      
       context.commit("DoCommandAsGeneralUserMutation", data);
     },
     DoCommandAsSudo(context, data) {
+      if (
+        data.command === undefined ||
+        data.command === null ||
+        data.command === ""
+      ) return;
+
       context.commit("DoCommandAsSudoMutation", data);
     }
   },

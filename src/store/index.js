@@ -6,18 +6,9 @@ Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {},
-  mutations: {
-    async RunCommandMutation(state, data) {
-      await ipcRenderer.invoke(
-        data.sudo === true
-          ? "do-command-as-sudo"
-          : "do-command-as-general-user",
-        { command: data.command, args: data.args }
-      );
-    }
-  },
+  mutations: {},
   actions: {
-    RunCommand(context, data) {
+    async RunCommand(context, data) {
       if (
         data.command === undefined ||
         data.command === null ||
@@ -28,21 +19,15 @@ export default new Vuex.Store({
       )
         return;
 
-      context.commit("RunCommandMutation", data);
+      const ret = await ipcRenderer.invoke(
+        data.sudo === true
+          ? "do-command-as-sudo"
+          : "do-command-as-general-user",
+        { command: data.command, args: data.args }
+      );
+
+      return ret;
     }
   },
   modules: {}
-});
-
-ipcRenderer.on("do-command-as-general-user__reply", (event, arg) => {
-  alert(arg);
-});
-ipcRenderer.on("do-command-as-general-user__error", (event, arg) => {
-  alert(`error occured !!! : ${arg}`);
-});
-ipcRenderer.on("do-command-as-sudo__reply", (event, arg) => {
-  alert(arg);
-});
-ipcRenderer.on("do-command-as-sudo__error", (event, arg) => {
-  alert(`error occured !!! : ${arg}`);
 });

@@ -80,24 +80,19 @@ if (isDevelopment) {
   }
 }
 
-ipcMain.handle("do-command-as-general-user", (event, { command, args }) => {
-  const p = require("child_process");
-  p.exec(`${command} ${args}`, { name: "Electron" }, (error, stdout) => {
-    if (error) {
-      event.sender.send("do-command-as-general-user__error", error);
-      return;
-    }
-    event.sender.send("do-command-as-general-user__reply", stdout);
-  });
-});
+ipcMain.handle(
+  "do-command-as-general-user",
+  async (event, { command, args }) => {
+    const util = require("util");
+    const exec = util.promisify(require("child_process").exec);
+    const ret = await exec(`${command} ${args}`, { name: "Electron" });
+    return ret.stdout;
+  }
+);
 
-ipcMain.handle("do-command-as-sudo", (event, { command, args }) => {
-  const p = require("sudo-prompt");
-  p.exec(`${command} ${args}`, { name: "Electron" }, (error, stdout) => {
-    if (error) {
-      event.sender.send("do-command-as-sudo__error", error);
-      return;
-    }
-    event.sender.send("do-command-as-sudo__reply", stdout);
-  });
+ipcMain.handle("do-command-as-sudo", async (event, { command, args }) => {
+  const util = require("util");
+  const exec = util.promisify(require("sudo-prompt").exec);
+  const ret = await exec(`${command} ${args}`, { name: "Electron" });
+  return ret.stdout;
 });

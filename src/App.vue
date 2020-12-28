@@ -29,9 +29,10 @@ export default {
   },
   methods: {
     TestMethod() {
-      this.$store.dispatch("DoCommandAsSudo", {
+      this.$store.dispatch("RunCommand", {
         command: "cat",
-        args: "/sudo-mochi/test.txt"
+        args: "/sudo-mochi/test.txt",
+        sudo: true
       });
     }
   },

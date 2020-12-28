@@ -7,33 +7,28 @@ Vue.use(Vuex);
 export default new Vuex.Store({
   state: {},
   mutations: {
-    async DoCommandAsGeneralUserMutation(state, data) {
-      await ipcRenderer.invoke("do-command-as-general-user", data);
-    },
-    async DoCommandAsSudoMutation(state, data) {
-      await ipcRenderer.invoke("do-command-as-sudo", data);
+    async RunCommandMutation(state, data) {
+      await ipcRenderer.invoke(
+        data.sudo === true
+          ? "do-command-as-sudo"
+          : "do-command-as-general-user",
+        { command: data.command, args: data.args }
+      );
     }
   },
   actions: {
-    DoCommandAsGeneralUser(context, data) {
+    RunCommand(context, data) {
       if (
         data.command === undefined ||
         data.command === null ||
-        data.command === ""
+        data.command === "" ||
+        data.sudo === undefined ||
+        data.sudo === null ||
+        (data.sudo !== true && data.sudo !== false)
       )
         return;
 
-      context.commit("DoCommandAsGeneralUserMutation", data);
-    },
-    DoCommandAsSudo(context, data) {
-      if (
-        data.command === undefined ||
-        data.command === null ||
-        data.command === ""
-      )
-        return;
-
-      context.commit("DoCommandAsSudoMutation", data);
+      context.commit("RunCommandMutation", data);
     }
   },
   modules: {}

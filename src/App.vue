@@ -11,7 +11,6 @@
         <about></about>
       </el-tab-pane>
     </el-tabs>
-    <el-button @click="TestMethod">ボタン</el-button>
     <!-- <img width="20" src="@/assets/icn_search.svg?data" /> -->
   </div>
 </template>
@@ -26,15 +25,6 @@ export default {
     Packages,
     Config,
     About
-  },
-  methods: {
-    TestMethod() {
-      this.$store.dispatch("RunCommand", {
-        command: "cat",
-        args: "/sudo-mochi/test.txt",
-        sudo: true
-      });
-    }
   },
   name: "App"
 };

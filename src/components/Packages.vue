@@ -34,23 +34,30 @@ export default {
   },
   methods: {
     async UpdatePackageList() {
+      // reset the list.
+      this.tableData = [];
+
       // list packages that user installed manually.
       const manualInstalledPackages = await this.$store.dispatch("RunCommand", {
         command: "apt-mark",
         args: "showmanual",
         sudo: false
       });
+
       // package list with version numbers. (contains packages that system installed automatically.)
       const dpkgReturns = await this.$store.dispatch("RunCommand", {
         command: "dpkg",
         args: "-l | grep '^ii'",
         sudo: false
       });
+
       const packageNames = manualInstalledPackages.split("\n");
       packageNames.pop(); // remove blank line on end.
       packageNames.forEach(name => {
+        // extract a version number.
         const regExp = new RegExp("ii +" + name + " +([^ ]*)");
         const match = dpkgReturns.match(regExp);
+        
         this.tableData.push({ name: name, version: match[1] });
       });
     }

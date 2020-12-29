@@ -11,10 +11,23 @@ $--font-path: '~element-ui/lib/theme-chalk/fonts';
 @import "~element-ui/packages/theme-chalk/src/index";
 
 #packages {
+    .el-table {
+        .upgradable-row {
+            &,
+            &.hover-row,
+            &.hover-row > td {
+                background-color: rgb(225, 243, 216);
+            }
+        }
+
+        .newest-row {
+            background-color: white;
+        }
+    }
     .el-table__fixed-body-wrapper {
         top: 60px !important;
-      }
-      .el-table__fixed-right-patch {
-          height: 60px !important;
-      }
+    }
+    .el-table__fixed-right-patch {
+        height: 60px !important;
+    }
 }

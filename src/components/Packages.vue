@@ -7,6 +7,7 @@
       <el-table
         ref="package-table"
         :data="tableData"
+        :row-class-name="TableRowStatus"
         class="package-table"
         height="560"
       >
@@ -15,9 +16,9 @@
         </el-table-column>
         <el-table-column label="version" prop="version"> </el-table-column>
         <el-table-column fixed="right" label="Operations" width="160">
-          <template>
-            <el-button>Update</el-button>
-            <el-button type="danger" icon="el-icon-delete" circle></el-button>
+          <template slot-scope="scope">
+            <el-button :disabled="!scope.row.upgradable">Update</el-button>
+            <el-button type="info" icon="el-icon-delete" circle></el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -33,6 +34,12 @@ export default {
     };
   },
   methods: {
+    TableRowStatus({ row }) {
+      if (row.upgradable) {
+        return "upgradable-row";
+      }
+      return "newest-row";
+    },
     async UpdatePackageList() {
       // reset the list.
       this.tableData = [];
@@ -57,8 +64,15 @@ export default {
         // extract a version number.
         const regExp = new RegExp("ii +" + name + " +([^ ]*)");
         const match = dpkgReturns.match(regExp);
-        
-        this.tableData.push({ name: name, version: match[1] });
+
+        // TODO: for debugging
+        const updateExist = name === "code";
+
+        this.tableData.push({
+          name: name,
+          version: match[1],
+          upgradable: updateExist
+        });
       });
     }
   },

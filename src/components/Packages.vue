@@ -19,16 +19,31 @@ export default {
       tableData: []
     };
   },
+  methods: {
+    async UpdatePackageList() {
+      // list packages that user installed manually.
+      const manualInstalledPackages = await this.$store.dispatch("RunCommand", {
+        command: "apt-mark",
+        args: "showmanual",
+        sudo: false
+      });
+      // package list with version numbers. (contains packages that system installed automatically.)
+      const dpkgReturns = await this.$store.dispatch("RunCommand", {
+        command: "dpkg",
+        args: "-l | grep '^ii'",
+        sudo: false
+      });
+      const packageNames = manualInstalledPackages.split("\n");
+      packageNames.pop(); // remove blank line on end.
+      packageNames.forEach(name => {
+        const regExp = new RegExp("ii +" + name + " +([^ ]*)");
+        const match = dpkgReturns.match(regExp);
+        this.tableData.push({ name: name, version: match[1] });
+      });
+    }
+  },
   async mounted() {
-    const ret = await this.$store.dispatch("RunCommand", {
-      command: "apt-mark",
-      args: "showmanual",
-      sudo: false
-    });
-    const packageNames = ret.split("\n");
-    packageNames.forEach(name => {
-      this.tableData.push({ name: name, version: "1.0.0" });
-    });
+    await this.UpdatePackageList();
   },
   name: "Packages"
 };

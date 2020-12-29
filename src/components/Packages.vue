@@ -4,9 +4,22 @@
       <el-button>Reset All Filters</el-button>
     </div>
     <div class="package-table-container">
-      <el-table ref="package-table" :data="tableData" class="package-table">
-        <el-table-column label="package name" prop="name"> </el-table-column>
+      <el-table
+        ref="package-table"
+        :data="tableData"
+        class="package-table"
+        height="560"
+      >
+        <el-table-column type="selection"></el-table-column>
+        <el-table-column label="package name" prop="name" sortable>
+        </el-table-column>
         <el-table-column label="version" prop="version"> </el-table-column>
+        <el-table-column fixed="right" label="Operations" width="160">
+          <template>
+            <el-button>Update</el-button>
+            <el-button type="danger" icon="el-icon-delete" circle></el-button>
+          </template>
+        </el-table-column>
       </el-table>
     </div>
   </div>
@@ -50,7 +63,9 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.package-table {
-  width: 100%;
+#packages {
+  .package-table {
+    width: 100%;
+  }
 }
 </style>

@@ -9,3 +9,12 @@ $--color-primary: teal;
 $--font-path: '~element-ui/lib/theme-chalk/fonts';
 
 @import "~element-ui/packages/theme-chalk/src/index";
+
+#packages {
+    .el-table__fixed-body-wrapper {
+        top: 60px !important;
+      }
+      .el-table__fixed-right-patch {
+          height: 60px !important;
+      }
+}

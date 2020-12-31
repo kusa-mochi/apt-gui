@@ -174,7 +174,7 @@ export default {
       });
 
       const packageNames = manualInstalledPackages.split("\n");
-      packageNames.pop(); // remove blank line on end.
+      packageNames.pop(); // remove blank line at the end.
       packageNames.forEach(name => {
         // extract a version number.
         const regExp = new RegExp("ii +" + name + " +([^ ]*)");

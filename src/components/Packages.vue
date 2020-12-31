@@ -129,10 +129,6 @@ export default {
               {
                 command: "grep",
                 args: `-E "^${this.repositorySearchQuery}[^\\s]*\\s+.*"`
-              },
-              {
-                command: "awk",
-                args: "-F'[/]' '{print $1 $2}'"
               }
             ]
           };
@@ -147,11 +143,7 @@ export default {
               },
               {
                 command: "grep",
-                args: `-E "[^\\s]*${this.repositorySearchQuery}\\s+.*"`
-              },
-              {
-                command: "awk",
-                args: "-F'[/]' '{print $1 $2}'"
+                args: `-E "^[^\\s]*${this.repositorySearchQuery}/[^\\s]*\\s+.*"`
               }
             ]
           };
@@ -166,11 +158,7 @@ export default {
               },
               {
                 command: "grep",
-                args: `-E "^${this.repositorySearchQuery}\\s+.*"`
-              },
-              {
-                command: "awk",
-                args: "-F'[/]' '{print $1 $2}'"
+                args: `-E "^${this.repositorySearchQuery}[^\\s]*\\s+.*"`
               }
             ]
           };
@@ -185,11 +173,7 @@ export default {
               },
               {
                 command: "grep",
-                args: `-E "[^\\s]*${this.repositorySearchQuery}[^\\s]*\\s+.*"`
-              },
-              {
-                command: "awk",
-                args: "-F'[/]' '{print $1 $2}'"
+                args: `-E "^[^\\s\\t]*${this.repositorySearchQuery}[^\\s\\t]*\\s+.*"`
               }
             ]
           };

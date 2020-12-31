@@ -11,7 +11,6 @@
         <about></about>
       </el-tab-pane>
     </el-tabs>
-    <!-- <img width="20" src="@/assets/icn_search.svg?data" /> -->
   </div>
 </template>
 

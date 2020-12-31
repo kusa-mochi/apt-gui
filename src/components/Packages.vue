@@ -105,37 +105,99 @@ export default {
       console.log(value);
     },
     async OnRepositorySearchInput(keyCode) {
-      if(keyCode !== 13) return;
+      // if not enter key pressed.
+      if (keyCode !== 13) return;
 
       // reset the list
       this.repositoryPackageList = [];
 
-      // apt args
-      let commandArgs = "";
+      // commands and sudo flag.
+      let dataToDispatch = null;
 
       console.log(this.repositorySearchSelect);
 
+      // switch by search mode.
       switch (this.repositorySearchSelect) {
         case "prefix":
-          commandArgs = `search ^${this.repositorySearchQuery} --names-only | grep -E "^${this.repositorySearchQuery}[^\\s]*\\s+.*" | awk -F'[/]' '{print $1 $2}'`;
+          dataToDispatch = {
+            sudo: false,
+            commands: [
+              {
+                command: "apt",
+                args: `search ^${this.repositorySearchQuery} --names-only`
+              },
+              {
+                command: "grep",
+                args: `-E "^${this.repositorySearchQuery}[^\\s]*\\s+.*"`
+              },
+              {
+                command: "awk",
+                args: "-F'[/]' '{print $1 $2}'"
+              }
+            ]
+          };
           break;
         case "end":
-          commandArgs = `search ${this.repositorySearchQuery}$ --names-only | grep -E "[^\\s]*${this.repositorySearchQuery}\\s+.*" | awk -F'[/]' '{print $1 $2}'`;
+          dataToDispatch = {
+            sudo: false,
+            commands: [
+              {
+                command: "apt",
+                args: `search ${this.repositorySearchQuery}$ --names-only`
+              },
+              {
+                command: "grep",
+                args: `-E "[^\\s]*${this.repositorySearchQuery}\\s+.*"`
+              },
+              {
+                command: "awk",
+                args: "-F'[/]' '{print $1 $2}'"
+              }
+            ]
+          };
           break;
         case "exact":
-          commandArgs = `search ^${this.repositorySearchQuery}$ --names-only | grep -E "^${this.repositorySearchQuery}\\s+.*" | awk -F'[/]' '{print $1 $2}'`;
+          dataToDispatch = {
+            sudo: false,
+            commands: [
+              {
+                command: "apt",
+                args: `search ^${this.repositorySearchQuery}$ --names-only`
+              },
+              {
+                command: "grep",
+                args: `-E "^${this.repositorySearchQuery}\\s+.*"`
+              },
+              {
+                command: "awk",
+                args: "-F'[/]' '{print $1 $2}'"
+              }
+            ]
+          };
           break;
         case "partial":
-          commandArgs = `search ${this.repositorySearchQuery} --names-only | grep -E "[^\\s]*${this.repositorySearchQuery}[^\\s]*\\s+.*" | awk -F'[/]' '{print $1 $2}'`;
+          dataToDispatch = {
+            sudo: false,
+            commands: [
+              {
+                command: "apt",
+                args: `search ${this.repositorySearchQuery} --names-only`
+              },
+              {
+                command: "grep",
+                args: `-E "[^\\s]*${this.repositorySearchQuery}[^\\s]*\\s+.*"`
+              },
+              {
+                command: "awk",
+                args: "-F'[/]' '{print $1 $2}'"
+              }
+            ]
+          };
           break;
         default:
           throw "invalid search mode.";
       }
-      const packages = await this.$store.dispatch("RunCommand", {
-        command: "apt",
-        args: commandArgs,
-        sudo: false
-      });
+      const packages = await this.$store.dispatch("RunCommand", dataToDispatch);
       const packageNames = packages.split("\n");
 
       packageNames.forEach(line => {
@@ -161,16 +223,24 @@ export default {
 
       // list packages that user installed manually.
       const manualInstalledPackages = await this.$store.dispatch("RunCommand", {
-        command: "apt-mark",
-        args: "showmanual",
-        sudo: false
+        sudo: false,
+        commands: [
+          {
+            command: "apt-mark",
+            args: "showmanual"
+          }
+        ]
       });
 
       // package list with version numbers. (contains packages that system installed automatically.)
       const dpkgReturns = await this.$store.dispatch("RunCommand", {
-        command: "dpkg",
-        args: "-l | grep '^ii'",
-        sudo: false
+        sudo: false,
+        commands: [
+          {
+            command: "dpkg",
+            args: "-l | grep '^ii'"
+          }
+        ]
       });
 
       const packageNames = manualInstalledPackages.split("\n");

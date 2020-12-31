@@ -80,21 +80,18 @@ if (isDevelopment) {
   }
 }
 
-ipcMain.handle(
-  "do-command-as-general-user",
-  async (event, { command, args }) => {
-    const util = require("util");
-    const exec = util.promisify(require("child_process").exec);
-    const ret = await exec(`${command} ${args}`, { name: "Electron" });
-    if (ret.error) return ret.error;
-    return ret.stdout;
-  }
-);
+ipcMain.handle("do-command-as-general-user", async (event, command) => {
+  const util = require("util");
+  const exec = util.promisify(require("child_process").exec);
+  const ret = await exec(command, { name: "Electron" });
+  if (ret.error) return ret.error;
+  return ret.stdout;
+});
 
-ipcMain.handle("do-command-as-sudo", async (event, { command, args }) => {
+ipcMain.handle("do-command-as-sudo", async (event, command) => {
   const util = require("util");
   const exec = util.promisify(require("sudo-prompt").exec);
-  const ret = await exec(`${command} ${args}`, { name: "Electron" });
+  const ret = await exec(command, { name: "Electron" });
   if (ret.error) return ret.error;
   return ret.stdout;
 });

@@ -1,12 +1,23 @@
 <template>
   <div id="packages">
     <div class="table-operations">
-      <el-button>Reset All Filters</el-button>
+      <el-input
+        @input="OnInstalledPackageSearchInput"
+        placeholder="Search for installed packages"
+        prefix-icon="el-icon-search"
+        v-model="packageSearchQuery"
+        class="installed-packages-input"
+        clearable
+      >
+      </el-input>
+      <el-button @click="repositoryDialogVisible = true"
+        >Install New Package</el-button
+      >
     </div>
     <div class="package-table-container">
       <el-table
         ref="package-table"
-        :data="tableData"
+        :data="installedPackageList"
         :row-class-name="TableRowStatus"
         class="package-table"
         height="560"
@@ -23,6 +34,57 @@
         </el-table-column>
       </el-table>
     </div>
+    <el-dialog
+      id="repository-dialog"
+      :visible.sync="repositoryDialogVisible"
+      fullscreen
+      title="Package Repository"
+      top="20px"
+    >
+      <div class="repository-dialog__body">
+        <div class="repository-operations">
+          <el-input
+            @input="OnRepositorySearchInput"
+            placeholder="Search for repository"
+            prefix-icon="el-icon-search"
+            v-model="repositorySearchQuery"
+            class="search-repository-input"
+            clearable
+          >
+            <el-select
+              v-model="repositorySearchSelect"
+              slot="prepend"
+              placeholder="method"
+            >
+              <el-option label="prefix search" value="prefix"></el-option>
+              <el-option label="end match" value="end"></el-option>
+              <el-option label="exact match" value="exact"></el-option>
+              <el-option label="partial match" value="partial"></el-option>
+            </el-select>
+          </el-input>
+          <el-button type="text" class="apt-update-button">
+            <img width="20" src="@/assets/icn_update.svg?data" />
+          </el-button>
+        </div>
+        <div class="repository-package-table-container">
+          <el-table
+            ref="repository-package-table"
+            :data="repositoryPackageList"
+            class="repository-package-table"
+            height="366"
+          >
+            <el-table-column label="package name" prop="name" sortable>
+            </el-table-column>
+            <el-table-column label="version" prop="version"> </el-table-column>
+          </el-table>
+        </div>
+      </div>
+      <span slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="repositoryDialogVisible = false"
+          >OK</el-button
+        >
+      </span>
+    </el-dialog>
   </div>
 </template>
 
@@ -30,10 +92,55 @@
 export default {
   data() {
     return {
-      tableData: []
+      packageSearchQuery: "",
+      repositoryDialogVisible: false,
+      repositoryPackageList: [],
+      repositorySearchQuery: "",
+      repositorySearchSelect: "prefix",
+      installedPackageList: []
     };
   },
   methods: {
+    OnInstalledPackageSearchInput(value) {
+      console.log(value);
+    },
+    async OnRepositorySearchInput(value) {
+      // reset the list
+      this.repositoryPackageList = [];
+
+      // apt args
+      let commandArgs = "";
+
+      switch (this.repositorySearchSelect) {
+        case "prefix":
+          commandArgs = `search ^${value} --names-only | grep -E "^${value}[^\\s]*\\s+" | awk -F'[/]' '{print $1}'`;
+          break;
+        case "end":
+          commandArgs = `search ${value}$ --names-only`;//  | grep "[^ ]*${value} +"`;
+          break;
+        case "exact":
+          commandArgs = `search ^${value}$ --names-only`;//  | grep "^${value} +"`;
+          break;
+        case "partial":
+          commandArgs = `search ${value} --names-only`;//  | grep "[^ ]*${value}[^ ]* +"`;
+          break;
+        default:
+          throw "invalid search mode.";
+      }
+      const packages = await this.$store.dispatch("RunCommand", {
+        command: "apt",
+        args: commandArgs,
+        sudo: false
+      });
+      const packageNames = packages.split("\n");
+      packageNames.forEach(name => {
+        this.repositoryPackageList.push({
+          name: name,
+          version: name
+        });
+      });
+      console.log(packages);
+    },
     TableRowStatus({ row }) {
       if (row.upgradable) {
         return "upgradable-row";
@@ -42,7 +149,7 @@ export default {
     },
     async UpdatePackageList() {
       // reset the list.
-      this.tableData = [];
+      this.installedPackageList = [];
 
       // list packages that user installed manually.
       const manualInstalledPackages = await this.$store.dispatch("RunCommand", {
@@ -68,7 +175,7 @@ export default {
         // TODO: for debugging
         const updateExist = name === "code";
 
-        this.tableData.push({
+        this.installedPackageList.push({
           name: name,
           version: match[1],
           upgradable: updateExist
@@ -87,6 +194,41 @@ export default {
 #packages {
   .package-table {
     width: 100%;
+  }
+
+  .table-operations {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-items: flex-start;
+    align-content: flex-start;
+  }
+
+  .installed-packages-input {
+    width: unset;
+  }
+}
+
+#repository-dialog {
+  .repository-operations {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-items: flex-start;
+    align-content: center;
+  }
+
+  .search-repository-input {
+    width: unset;
+  }
+
+  .apt-update-button {
+    padding: 8px;
+  }
+
+  .repository-package-table {
   }
 }
 </style>

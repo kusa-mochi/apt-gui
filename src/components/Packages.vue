@@ -44,7 +44,7 @@
       <div class="repository-dialog__body">
         <div class="repository-operations">
           <el-input
-            @input="OnRepositorySearchInput"
+            @keydown.enter.native="OnRepositorySearchInput($event.keyCode)"
             placeholder="Search for repository"
             prefix-icon="el-icon-search"
             v-model="repositorySearchQuery"
@@ -104,25 +104,29 @@ export default {
     OnInstalledPackageSearchInput(value) {
       console.log(value);
     },
-    async OnRepositorySearchInput(value) {
+    async OnRepositorySearchInput(keyCode) {
+      if(keyCode !== 13) return;
+
       // reset the list
       this.repositoryPackageList = [];
 
       // apt args
       let commandArgs = "";
 
+      console.log(this.repositorySearchSelect);
+
       switch (this.repositorySearchSelect) {
         case "prefix":
-          commandArgs = `search ^${value} --names-only | grep -E "^${value}[^\\s]*\\s+" | awk -F'[/]' '{print $1}'`;
+          commandArgs = `search ^${this.repositorySearchQuery} --names-only | grep -E "^${this.repositorySearchQuery}[^\\s]*\\s+.*" | awk -F'[/]' '{print $1 $2}'`;
           break;
         case "end":
-          commandArgs = `search ${value}$ --names-only`;//  | grep "[^ ]*${value} +"`;
+          commandArgs = `search ${this.repositorySearchQuery}$ --names-only | grep -E "[^\\s]*${this.repositorySearchQuery}\\s+.*" | awk -F'[/]' '{print $1 $2}'`;
           break;
         case "exact":
-          commandArgs = `search ^${value}$ --names-only`;//  | grep "^${value} +"`;
+          commandArgs = `search ^${this.repositorySearchQuery}$ --names-only | grep -E "^${this.repositorySearchQuery}\\s+.*" | awk -F'[/]' '{print $1 $2}'`;
           break;
         case "partial":
-          commandArgs = `search ${value} --names-only`;//  | grep "[^ ]*${value}[^ ]* +"`;
+          commandArgs = `search ${this.repositorySearchQuery} --names-only | grep -E "[^\\s]*${this.repositorySearchQuery}[^\\s]*\\s+.*" | awk -F'[/]' '{print $1 $2}'`;
           break;
         default:
           throw "invalid search mode.";
@@ -133,12 +137,16 @@ export default {
         sudo: false
       });
       const packageNames = packages.split("\n");
-      packageNames.forEach(name => {
+
+      packageNames.forEach(line => {
+        const name = line.split("/")[0];
+        const version = line.split(" ")[1];
         this.repositoryPackageList.push({
           name: name,
-          version: name
+          version: version
         });
       });
+
       console.log(packages);
     },
     TableRowStatus({ row }) {
@@ -206,7 +214,7 @@ export default {
   }
 
   .installed-packages-input {
-    width: unset;
+    width: 250px;
   }
 }
 

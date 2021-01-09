@@ -26,6 +26,7 @@
         <el-table-column label="package name" prop="name" sortable>
         </el-table-column>
         <el-table-column label="version" prop="version"> </el-table-column>
+        <el-table-column label="newest" prop="newVersion"></el-table-column>
         <el-table-column fixed="right" label="Operations" width="160">
           <template slot-scope="scope">
             <el-button :disabled="!scope.row.upgradable">Update</el-button>
@@ -62,8 +63,12 @@ export default {
     },
     TableRowStatus({ row }) {
       if (row.upgradable) {
+        // html class name on an upgradable package row.
+        // Its style is defined in style tag below.
         return "upgradable-row";
       }
+      // html class name on a non-upgradable package row.
+      // Its style is defined in style tag below.
       return "newest-row";
     },
     async UpdatePackageList() {
@@ -75,8 +80,16 @@ export default {
         sudo: false,
         commands: [
           {
-            command: "apt-mark",
-            args: "showmanual"
+            command: "dpkg",
+            args: "-l"
+          },
+          {
+            command: "grep",
+            args: '-E "^[^|]+\\s+.*"'
+          },
+          {
+            command: "awk",
+            args: "'{print $2}'"
           }
         ]
       });
@@ -92,29 +105,41 @@ export default {
         ]
       });
 
+      // upgradable package list
+      const upgradablePackages = await this.$store.dispatch("RunCommand", {
+        sudo: false,
+        commands: [
+          {
+            command: "apt",
+            args: "list --upgradable"
+          }
+        ]
+      });
+      const upgradablePackageList = upgradablePackages.split("\n");
+
       const packageNames = manualInstalledPackages.split("\n");
       packageNames.pop(); // remove blank line at the end.
       packageNames.forEach(name => {
-        // // package status
-        // const desiredState = line.substring(0, 1);
-        // const currentState = line.substring(1, 2);
-        // const errorState =
-        //   line.substring(2, 3) === " " ? "" : line.substring(2, 3);
-
-        // extract a version number.
-        const regExp = new RegExp("[^ ]+ +" + name + " +([^ ]*)");
+        const nameForRegex = name.replace("+", "\\+").replace(".", "\\.");
+        // extract a current version number.
+        const regExp = new RegExp("[^ ]+ +" + nameForRegex + " +([^ ]*)");
         const match = dpkgReturns.match(regExp);
-
-        // TODO: for debugging
-        const updateExist = name === "code";
+        let newestVersion = "---";
+        const upgradablePackage = upgradablePackageList.filter(line => {
+          if (line.split("/")[0] === name) {
+            // extract the newest version number.
+            newestVersion = line.split("/")[1].split(" ")[1];
+            return true;
+          }
+          return false;
+        });
+        const updateExist = upgradablePackage.length > 0;
 
         this.installedPackageList.push({
           name: name,
           version: match[1],
+          newVersion: newestVersion,
           upgradable: updateExist
-          // desiredPackageState: desiredState,
-          // currentPackageState: currentState,
-          // errorState: errorState
         });
       });
     }

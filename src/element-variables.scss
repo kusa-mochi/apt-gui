@@ -10,7 +10,7 @@ $--font-path: '~element-ui/lib/theme-chalk/fonts';
 
 @import "~element-ui/packages/theme-chalk/src/index";
 
-#packages {
+#installed-packages {
     .el-table {
         .upgradable-row {
             &,
@@ -32,11 +32,31 @@ $--font-path: '~element-ui/lib/theme-chalk/fonts';
     }
 }
 
-#repository-dialog {
-    .el-input--prefix .el-select .el-input__inner {
-        padding-left: 16px;
-    }
-    .el-select .el-input {
-        width: 152px;
+#repository-packages {
+    .repository-operations {
+        > .el-input-group,
+        > .el-input {
+            width: unset;
+        }
+
+        // text input for searching.
+        .search-repository-input > {
+            .el-input__inner {
+                width: unset;
+            }
+            .el-input__prefix {
+                transform: translateX(154px) !important;
+            }
+        }
+
+        // dropdown to select search mode.
+        .el-select {
+            .el-input {
+                width: 152px;
+            }
+            .el-input__inner {
+                padding-left: 16px;
+            }
+        }
     }
 }

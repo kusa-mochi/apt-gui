@@ -128,6 +128,15 @@ export default {
 
 <style lang="scss" scoped>
 #installed-packages {
+  .table-operations {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-items: center;
+    align-content: flex-start;
+  }
+
   .installed-packages-input {
     width: unset;
   }
